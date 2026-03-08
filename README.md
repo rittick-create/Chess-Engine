@@ -33,6 +33,8 @@ This project also serves as a learning journey into:
 
 ---
 
+---
+
 # 🗺 Development Roadmap
 
 ## Phase 1 — Foundations
@@ -78,7 +80,7 @@ This project also serves as a learning journey into:
 
 # 📊 Progress
 
-- [] Board representation
+- [ ] Board representation
 - [ ] Piece movement rules
 - [ ] Legal move generation
 - [ ] Check / Checkmate detection

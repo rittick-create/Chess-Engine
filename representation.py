@@ -180,24 +180,60 @@ side_to_move = WHITE
 """-------------------------"""
 #setting up the next position
 # user passes the next position    
-def set_bits(next_position):
+
+def set_bits(next_position, previous_square=None):
     global side_to_move
     move = next_position.upper()
-    piece_info=move[0]
-    position=move[1:]
+    piece_info = move[0]
+    position = move[1:]
     
-    if(side_to_move==0):
-        piece=piece_map_white[piece_info]
-        square=Square[position]
-        bitboards[piece] |= 1<<square
+    if side_to_move == WHITE:
+        piece = piece_map_white[piece_info]
     else:
-        piece=piece_map_black[piece_info]
-        square=Square[position]
-        bitboards[piece] |= 1<<square
-    side_to_move^=1
+        piece = piece_map_black[piece_info]
     
+    square = Square[position]
+
+    # Remove previous bit if given
+    if previous_square is not None:
+        bitboards[piece] &= ~(1 << previous_square)
+
+    # Set new bit
+    bitboards[piece] |= 1 << square
     
+    # Update occupancies
+    occupancies[Board.WHITE_PIECES] = sum(bitboards[Piece.WHITE_PAWN:Piece.WHITE_KING + 1])
+    occupancies[Board.BLACK_PIECES] = sum(bitboards[Piece.BLACK_PAWN:Piece.BLACK_KING + 1])
+    occupancies[Board.FULL_BOARD] = occupancies[Board.WHITE_PIECES] | occupancies[Board.BLACK_PIECES]
+
+    side_to_move ^= 1
     
+
+     
+        
+def print_board_unicode():
+    symbol_map = {
+        Piece.WHITE_PAWN: "♙", Piece.WHITE_KNIGHT: "♘", Piece.WHITE_BISHOP: "♗",
+        Piece.WHITE_ROOK: "♖", Piece.WHITE_QUEEN: "♕", Piece.WHITE_KING: "♔",
+        Piece.BLACK_PAWN: "♟", Piece.BLACK_KNIGHT: "♞", Piece.BLACK_BISHOP: "♝",
+        Piece.BLACK_ROOK: "♜", Piece.BLACK_QUEEN: "♛", Piece.BLACK_KING: "♚"
+    }
+
+    print("  a b c d e f g h")
+    for row in range(7, -1, -1):
+        print(8 - row, end=" ")  # Rank numbers
+        for col in range(8):
+            sq = row * 8 + col
+            piece_found = False
+            for piece_index, bb in enumerate(bitboards):
+                if bb & (1 << sq):
+                    print(symbol_map[Piece(piece_index)], end=" ")
+                    piece_found = True
+                    break
+            if not piece_found:
+                print("·", end=" ")  # Empty square
+        print(" ", 8 - row)  # Rank numbers again
+    print("  a b c d e f g h\n")  # File letters at bottom    
     
     
     

@@ -126,10 +126,70 @@ the idea behind having these 3 are:-
 •	sliding piece attacks
 •	move legality
 
-
-
-
-
-
 """  
+
+bitboards = [0] * 12 # creates a list of 12  integers(0)
+
+class Piece(IntEnum):
+    WHITE_PAWN = 0
+    WHITE_KNIGHT = 1
+    WHITE_BISHOP = 2
+    WHITE_ROOK = 3
+    WHITE_QUEEN = 4
+    WHITE_KING = 5
+    BLACK_PAWN = 6
+    BLACK_KNIGHT = 7
+    BLACK_BISHOP = 8
+    BLACK_ROOK = 9
+    BLACK_QUEEN = 10
+    BLACK_KING = 11
+    
+
+piece_map = {
+    "P": Piece.WHITE_PAWN,
+    "N": Piece.WHITE_KNIGHT,
+    "B": Piece.WHITE_BISHOP,
+    "R": Piece.WHITE_ROOK,
+    "Q": Piece.WHITE_QUEEN,
+    "K": Piece.WHITE_KING
+}
+
+occupancies = [0] * 3
+
+class Board(IntEnum):
+    WHITE_PIECES=0
+    BLACK_PIECES=1
+    FULL_BOARD=2    
+ 
+"""-------------------------"""
+#setting up the next position
+# user passes the next position    
+def set_bits(next_position):
+    move = next_position.upper()
+    piece_info=move[0]
+    position=move[1:]
+    
+    piece=piece_map[piece_info]
+    square=Square[position]
+    bitboards[piece] |= 1<<square
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+ 
+    
+    
+        
+
+
+
+
+
+
 

@@ -78,7 +78,7 @@ This project also serves as a learning journey into:
 
 # 📊 Progress
 
-- [done ] Board representation
+- [] Board representation
 - [ ] Piece movement rules
 - [ ] Legal move generation
 - [ ] Check / Checkmate detection

@@ -31,6 +31,88 @@ This project also serves as a learning journey into:
 
 ---
 
-# 🧠 How the Engine Will Work
+---
 
-The chess bot will follow a classical engine pipeline:
+# 🗺 Development Roadmap
+
+## Phase 1 — Foundations
+- Board representation
+- Piece encoding
+- Board printing
+
+## Phase 2 — Chess Rules
+- Pawn movement
+- Knight movement
+- Bishop movement
+- Rook movement
+- Queen movement
+- King movement
+
+## Phase 3 — Game Logic
+- Generate legal moves
+- Capture rules
+- Check detection
+- Checkmate detection
+- Stalemate detection
+- Castling
+- En passant
+- Pawn promotion
+
+## Phase 4 — Chess Engine
+- Evaluation function
+- Minimax algorithm
+- Alpha-Beta pruning
+- Move ordering optimization
+
+## Phase 5 — Interface
+- Command line gameplay
+- GUI chess board
+- Human vs Bot
+
+## Phase 6 — AI & Learning
+- Self-play training
+- Reinforcement learning
+- Engine performance tuning
+
+---
+
+# 📊 Progress
+
+- [ ] Board representation
+- [ ] Piece movement rules
+- [ ] Legal move generation
+- [ ] Check / Checkmate detection
+- [ ] Minimax engine
+- [ ] Alpha-beta pruning
+- [ ] GUI
+- [ ] Self-learning bot
+
+---
+
+# 🎯 Purpose of This Project
+
+Modern AI often feels like a **black box**.
+
+Chess engines demonstrate that powerful decision making can emerge from **simple algorithms and structured search**.
+
+By building everything from scratch, this project explores how intelligence can arise from:
+
+- logical rules
+- evaluation heuristics
+- search algorithms
+
+---
+
+# 🚀 Future Ideas
+
+- Chess position database
+- Opening book
+- Endgame tablebases
+- Neural network evaluation
+- Engine benchmarking
+
+---
+
+# 👨‍💻 Author
+
+Built as a learning project exploring **chess engines, algorithms, and artificial intelligence**.

@@ -145,7 +145,7 @@ class Piece(IntEnum):
     BLACK_KING = 11
     
 
-piece_map = {
+piece_map_white = {
     "P": Piece.WHITE_PAWN,
     "N": Piece.WHITE_KNIGHT,
     "B": Piece.WHITE_BISHOP,
@@ -154,24 +154,47 @@ piece_map = {
     "K": Piece.WHITE_KING
 }
 
+
+piece_map_black = {
+    "P": Piece.BLACK_PAWN,
+    "N": Piece.BLACK_KNIGHT,
+    "B": Piece.BLACK_BISHOP,
+    "R": Piece.BLACK_ROOK,
+    "Q": Piece.BLACK_QUEEN,
+    "K": Piece.BLACK_KING
+}
+
 occupancies = [0] * 3
 
 class Board(IntEnum):
     WHITE_PIECES=0
     BLACK_PIECES=1
     FULL_BOARD=2    
+    
+    
+WHITE = 0
+BLACK = 1
+
+side_to_move = WHITE    
  
 """-------------------------"""
 #setting up the next position
 # user passes the next position    
 def set_bits(next_position):
+    global side_to_move
     move = next_position.upper()
     piece_info=move[0]
     position=move[1:]
     
-    piece=piece_map[piece_info]
-    square=Square[position]
-    bitboards[piece] |= 1<<square
+    if(side_to_move==0):
+        piece=piece_map_white[piece_info]
+        square=Square[position]
+        bitboards[piece] |= 1<<square
+    else:
+        piece=piece_map_black[piece_info]
+        square=Square[position]
+        bitboards[piece] |= 1<<square
+    side_to_move^=1
     
     
     

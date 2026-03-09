@@ -116,3 +116,4 @@ the idea behind having these 3 are:-
 •	move legality
 
 
+Now we will be using fen parser to initiate bits

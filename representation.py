@@ -2,6 +2,7 @@
 
 from enum import IntEnum
 
+
 class Square(IntEnum):
     A1=0;  B1=1;  C1=2;  D1=3;  E1=4;  F1=5;  G1=6;  H1=7
     A2=8;  B2=9;  C2=10; D2=11; E2=12; F2=13; G2=14; H2=15
@@ -15,7 +16,10 @@ class Square(IntEnum):
 
 
 bitboards = [0] * 12 # creates a list of 12  integers(0)
+occupancies = [0] * 3
 
+
+# a piece enum class to map with bitboard
 class Piece(IntEnum):
     WHITE_PAWN = 0
     WHITE_KNIGHT = 1
@@ -50,7 +54,7 @@ piece_map_black = {
     "K": Piece.BLACK_KING
 }
 
-occupancies = [0] * 3
+
 
 class Board(IntEnum):
     WHITE_PIECES=0
@@ -61,42 +65,83 @@ class Board(IntEnum):
 WHITE = 0
 BLACK = 1
 
-side_to_move = WHITE    
+side_to_move = WHITE   
+
+"--------------------------------------------------------------------------------------"
+#function for updating occupancies
+
+def update_occupancies():
+    white = 0
+    for p in range(Piece.WHITE_PAWN, Piece.WHITE_KING + 1):
+        white |= bitboards[p]
+    
+    black = 0
+    for p in range(Piece.BLACK_PAWN, Piece.BLACK_KING + 1):
+        black |= bitboards[p]
+    
+    occupancies[Board.WHITE_PIECES] = white
+    occupancies[Board.BLACK_PIECES] = black
+    occupancies[Board.FULL_BOARD] = white | black 
  
-"""-------------------------"""
+
+"--------------------------------------------------------------------------------------"
+
+#to get the piece at a particular square
+def get_piece_at(square):
+    for index,bb in enumerate(bitboards):
+        if(bb & 1<<square):
+            return Piece(index)
+    return None
+
+
+"--------------------------------------------------------------------------------------"
 #setting up the next position
-# user passes the next position    
+# user passes the next position  
+
+# the user will pass something like qc6=>Q C6
+#previous square will be set while runnung the game probably using do while or something  
 
 def set_bits(next_position, previous_square=None):
+   
+    
     global side_to_move
     move = next_position.upper()
     piece_info = move[0]
     position = move[1:]
     
+    if len(move) < 3:
+        print(f"[Error] Invalid input '{next_position}' — expected format like 'PA2' or 'NF3'")
+        return
+    
+  
+
     if side_to_move == WHITE:
         piece = piece_map_white[piece_info]
     else:
         piece = piece_map_black[piece_info]
-    
+
     square = Square[position]
 
-    # Remove previous bit if given
+    #handling capture
+    target_piece = get_piece_at(square)
+    if target_piece is not None:
+        bitboards[target_piece] &= ~(1 << square)  # clear enemy piece
+
+    #handling previous bit
     if previous_square is not None:
         bitboards[piece] &= ~(1 << previous_square)
 
-    # Set new bit
+    # Setting up new bit
     bitboards[piece] |= 1 << square
-    
-    # Update occupancies
-    occupancies[Board.WHITE_PIECES] = sum(bitboards[Piece.WHITE_PAWN:Piece.WHITE_KING + 1])
-    occupancies[Board.BLACK_PIECES] = sum(bitboards[Piece.BLACK_PAWN:Piece.BLACK_KING + 1])
-    occupancies[Board.FULL_BOARD] = occupancies[Board.WHITE_PIECES] | occupancies[Board.BLACK_PIECES]
 
+    update_occupancies()
     side_to_move ^= 1
     
 
+"--------------------------------------------------------------------------------------"
      
-        
+ 
+"--------------------------------------------------------------------------------------"       
 def print_board_unicode():
     symbol_map = {
         Piece.WHITE_PAWN: "♙", Piece.WHITE_KNIGHT: "♘", Piece.WHITE_BISHOP: "♗",
@@ -106,8 +151,9 @@ def print_board_unicode():
     }
 
     print("  a b c d e f g h")
+    print()
     for row in range(7, -1, -1):
-        print(8 - row, end=" ")  # Rank numbers
+        print(8 - row, end="  ")  # Rank numbers
         for col in range(8):
             sq = row * 8 + col
             piece_found = False
@@ -119,21 +165,81 @@ def print_board_unicode():
             if not piece_found:
                 print("·", end=" ")  # Empty square
         print(" ", 8 - row)  # Rank numbers again
+    print()    
     print("  a b c d e f g h\n")  # File letters at bottom    
-    
+
+"--------------------------------------------------------------------------------------"    
    
+#creating    intital bits and running the play
+
     
-    
-    
-    
- 
-    
-    
-        
+"""        
+
+FEN (Forsyth-Edwards Notation) -A single line sting notation for a chess board
+
+example-
+"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" 
+Right now we only use parts 1 and 2. The rest will matter later.
+
+w refers to the side which is going to move
+
+and fen[0] represents all the positions
 
 
 
+"""
 
 
 
+def load_fen(fen: str):
+    global side_to_move, bitboards, occupancies
 
+    #reset everything will probably remove this later or have to find some solution
+    bitboards[:] = [0] * 12
+    occupancies[:] = [0] * 3
+
+    fen_parts = fen.strip().split()
+    if len(fen_parts) < 2:
+        print("[Error] Invalid FEN — too short")
+        return
+
+    board_part = fen_parts[0]
+    turn = fen_parts[1]
+
+    #this is for the ones where fen[0][i] is actually a piece(Char)
+    fen_piece_map = {
+        "P": Piece.WHITE_PAWN,   "N": Piece.WHITE_KNIGHT,
+        "B": Piece.WHITE_BISHOP, "R": Piece.WHITE_ROOK,
+        "Q": Piece.WHITE_QUEEN,  "K": Piece.WHITE_KING,
+        "p": Piece.BLACK_PAWN,   "n": Piece.BLACK_KNIGHT,
+        "b": Piece.BLACK_BISHOP, "r": Piece.BLACK_ROOK,
+        "q": Piece.BLACK_QUEEN,  "k": Piece.BLACK_KING,
+    }
+
+
+    rank = 7
+    file = 0
+
+    for char in board_part:
+        if char == "/":
+            rank -= 1
+            file = 0
+        elif char.isdigit():
+            file += int(char)       # skip empty squares
+        elif char in fen_piece_map:
+            square = rank * 8 + file
+            bitboards[fen_piece_map[char]] |= 1 << square
+            file += 1
+        else:
+            print(f"[Error] Unknown FEN character '{char}'")
+            return
+
+    side_to_move = WHITE if turn == "w" else BLACK
+    update_occupancies()
+    print(f" FEN loaded. {'White' if side_to_move == WHITE else 'Black'} to move.")
+
+
+"--------------------------------------------------------------------------------------"    
+
+load_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+print_board_unicode()

@@ -2,6 +2,7 @@
 
 from enum import IntEnum
 
+
 class Square(IntEnum):
     A1=0;  B1=1;  C1=2;  D1=3;  E1=4;  F1=5;  G1=6;  H1=7
     A2=8;  B2=9;  C2=10; D2=11; E2=12; F2=13; G2=14; H2=15
@@ -15,7 +16,10 @@ class Square(IntEnum):
 
 
 bitboards = [0] * 12 # creates a list of 12  integers(0)
+occupancies = [0] * 3
 
+
+# a piece enum class to map with bitboard
 class Piece(IntEnum):
     WHITE_PAWN = 0
     WHITE_KNIGHT = 1
@@ -50,7 +54,7 @@ piece_map_black = {
     "K": Piece.BLACK_KING
 }
 
-occupancies = [0] * 3
+
 
 class Board(IntEnum):
     WHITE_PIECES=0
@@ -61,42 +65,83 @@ class Board(IntEnum):
 WHITE = 0
 BLACK = 1
 
-side_to_move = WHITE    
+side_to_move = WHITE   
+
+"--------------------------------------------------------------------------------------"
+#function for updating occupancies
+
+def update_occupancies():
+    white = 0
+    for p in range(Piece.WHITE_PAWN, Piece.WHITE_KING + 1):
+        white |= bitboards[p]
+    
+    black = 0
+    for p in range(Piece.BLACK_PAWN, Piece.BLACK_KING + 1):
+        black |= bitboards[p]
+    
+    occupancies[Board.WHITE_PIECES] = white
+    occupancies[Board.BLACK_PIECES] = black
+    occupancies[Board.FULL_BOARD] = white | black 
  
-"""-------------------------"""
+
+"--------------------------------------------------------------------------------------"
+
+#to get the piece at a particular square
+def get_piece_at(square):
+    for index,bb in enumerate(bitboards):
+        if(bb & 1<<square):
+            return Piece(index)
+    return None
+
+
+"--------------------------------------------------------------------------------------"
 #setting up the next position
-# user passes the next position    
+# user passes the next position  
+
+# the user will pass something like qc6=>Q C6
+#previous square will be set while runnung the game probably using do while or something  
 
 def set_bits(next_position, previous_square=None):
+   
+    
     global side_to_move
     move = next_position.upper()
     piece_info = move[0]
     position = move[1:]
     
+    if len(move) < 3:
+        print(f"[Error] Invalid input '{next_position}' — expected format like 'PA2' or 'NF3'")
+        return
+    
+  
+
     if side_to_move == WHITE:
         piece = piece_map_white[piece_info]
     else:
         piece = piece_map_black[piece_info]
-    
+
     square = Square[position]
 
-    # Remove previous bit if given
+    #handling capture
+    target_piece = get_piece_at(square)
+    if target_piece is not None:
+        bitboards[target_piece] &= ~(1 << square)  # clear enemy piece
+
+    #handling previous bit
     if previous_square is not None:
         bitboards[piece] &= ~(1 << previous_square)
 
-    # Set new bit
+    # Setting up new bit
     bitboards[piece] |= 1 << square
-    
-    # Update occupancies
-    occupancies[Board.WHITE_PIECES] = sum(bitboards[Piece.WHITE_PAWN:Piece.WHITE_KING + 1])
-    occupancies[Board.BLACK_PIECES] = sum(bitboards[Piece.BLACK_PAWN:Piece.BLACK_KING + 1])
-    occupancies[Board.FULL_BOARD] = occupancies[Board.WHITE_PIECES] | occupancies[Board.BLACK_PIECES]
 
+    update_occupancies()
     side_to_move ^= 1
     
 
+"--------------------------------------------------------------------------------------"
      
-        
+ 
+"--------------------------------------------------------------------------------------"       
 def print_board_unicode():
     symbol_map = {
         Piece.WHITE_PAWN: "♙", Piece.WHITE_KNIGHT: "♘", Piece.WHITE_BISHOP: "♗",
@@ -120,14 +165,11 @@ def print_board_unicode():
                 print("·", end=" ")  # Empty square
         print(" ", 8 - row)  # Rank numbers again
     print("  a b c d e f g h\n")  # File letters at bottom    
-    
+
+"--------------------------------------------------------------------------------------"    
    
-    
-    
-    
-    
- 
-    
+#creating    intital bits and running the play
+
     
         
 

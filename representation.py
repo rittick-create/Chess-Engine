@@ -151,8 +151,9 @@ def print_board_unicode():
     }
 
     print("  a b c d e f g h")
+    print()
     for row in range(7, -1, -1):
-        print(8 - row, end=" ")  # Rank numbers
+        print(8 - row, end="  ")  # Rank numbers
         for col in range(8):
             sq = row * 8 + col
             piece_found = False
@@ -164,6 +165,7 @@ def print_board_unicode():
             if not piece_found:
                 print("·", end=" ")  # Empty square
         print(" ", 8 - row)  # Rank numbers again
+    print()    
     print("  a b c d e f g h\n")  # File letters at bottom    
 
 "--------------------------------------------------------------------------------------"    
@@ -171,11 +173,73 @@ def print_board_unicode():
 #creating    intital bits and running the play
 
     
-        
+"""        
+
+FEN (Forsyth-Edwards Notation) -A single line sting notation for a chess board
+
+example-
+"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" 
+Right now we only use parts 1 and 2. The rest will matter later.
+
+w refers to the side which is going to move
+
+and fen[0] represents all the positions
 
 
 
+"""
 
 
 
+def load_fen(fen: str):
+    global side_to_move, bitboards, occupancies
 
+    #reset everything will probably remove this later or have to find some solution
+    bitboards[:] = [0] * 12
+    occupancies[:] = [0] * 3
+
+    fen_parts = fen.strip().split()
+    if len(fen_parts) < 2:
+        print("[Error] Invalid FEN — too short")
+        return
+
+    board_part = fen_parts[0]
+    turn = fen_parts[1]
+
+    #this is for the ones where fen[0][i] is actually a piece(Char)
+    fen_piece_map = {
+        "P": Piece.WHITE_PAWN,   "N": Piece.WHITE_KNIGHT,
+        "B": Piece.WHITE_BISHOP, "R": Piece.WHITE_ROOK,
+        "Q": Piece.WHITE_QUEEN,  "K": Piece.WHITE_KING,
+        "p": Piece.BLACK_PAWN,   "n": Piece.BLACK_KNIGHT,
+        "b": Piece.BLACK_BISHOP, "r": Piece.BLACK_ROOK,
+        "q": Piece.BLACK_QUEEN,  "k": Piece.BLACK_KING,
+    }
+
+
+    rank = 7
+    file = 0
+
+    for char in board_part:
+        if char == "/":
+            rank -= 1
+            file = 0
+        elif char.isdigit():
+            file += int(char)       # skip empty squares
+        elif char in fen_piece_map:
+            square = rank * 8 + file
+            bitboards[fen_piece_map[char]] |= 1 << square
+            file += 1
+        else:
+            print(f"[Error] Unknown FEN character '{char}'")
+            return
+
+    side_to_move = WHITE if turn == "w" else BLACK
+    update_occupancies()
+    print(f" FEN loaded. {'White' if side_to_move == WHITE else 'Black'} to move.")
+
+
+"--------------------------------------------------------------------------------------"    
+
+load_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+print_board_unicode()
